@@ -7,8 +7,8 @@
 4. Cấu hình file .env
 
 5. Create new user by command: `php artisan ophim:user`
-
-6. Run `php artisan optimize:clear`
+6. Run php artisan storage:link
+7. Run `php artisan optimize:clear`
 
 # Command:
 - Generate menu categories & regions: `php artisan ophim:menu:generate`
