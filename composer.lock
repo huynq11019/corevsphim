@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a7ed4cbd21dd61b46d972e8883a7d22b",
+    "content-hash": "100c4ae6f54fac7cb53a651cce3bb98a",
     "packages": [
         {
             "name": "artesaos/seotools",
@@ -4181,59 +4181,6 @@
                 "source": "https://github.com/nikic/PHP-Parser/tree/v5.1.0"
             },
             "time": "2024-07-01T20:03:41+00:00"
-        },
-        {
-            "name": "nqt/theme-thempho",
-            "version": "dev-main",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/onezoroone/theme1.git",
-                "reference": "cbd6b4788e78fca1d0a98a5527be58b83ef7d839"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/onezoroone/theme1/zipball/cbd6b4788e78fca1d0a98a5527be58b83ef7d839",
-                "reference": "cbd6b4788e78fca1d0a98a5527be58b83ef7d839",
-                "shasum": ""
-            },
-            "require": {
-                "ckfinder/ckfinder-laravel-package": "v3.5.2.1",
-                "hacoidev/ophim-core": "^1.0.0",
-                "laravel/framework": "^6|^7|^8",
-                "laravel/socialite": "*"
-            },
-            "default-branch": true,
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "NQT\\ThemeThemPho\\ThemeThemPhoServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "NQT\\ThemeThemPho\\": "src/",
-                    "NQT\\ThemeThemPho\\Database\\Seeders\\": "database/seeders/",
-                    "NQT\\ThemeThemPho\\Database\\Factories\\": "database/factories/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "nqt",
-                    "email": "truyen3oads@gmail.com"
-                }
-            ],
-            "description": "NQT's thempho theme",
-            "support": {
-                "issues": "https://github.com/onezoroone/theme1/issues",
-                "source": "https://github.com/onezoroone/theme1/tree/main"
-            },
-            "time": "2025-04-28T14:33:51+00:00"
         },
         {
             "name": "ophimcms/theme-motchill",
@@ -11025,9 +10972,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "nqt/theme-thempho": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

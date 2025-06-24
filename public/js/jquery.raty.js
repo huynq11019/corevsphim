@@ -1,2 +1,455 @@
-/*! For license information please see jquery.raty.js.LICENSE.txt */
-(()=>{function t(a){return t="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t},t(a)}var a,e;a=jQuery,e={init:function(t){return this.each((function(){e.destroy.call(this),this.opt=a.extend(!0,{},a.fn.raty.defaults,t);var i=a(this);e._callback.call(this,["number","readOnly","score","scoreName"]),this.opt.precision&&e._adjustPrecision.call(this),this.opt.number=e._between(this.opt.number,0,this.opt.numberMax),this.opt.path=this.opt.path||"",this.opt.path&&"/"!==this.opt.path.slice(this.opt.path.length-1,this.opt.path.length)&&(this.opt.path+="/"),this.stars=e._createStars.call(this),this.score=e._createScore.call(this),e._apply.call(this,this.opt.score);var o=this.opt.space?4:0,s=this.opt.width||this.opt.number*this.opt.size+this.opt.number*o;this.opt.cancel&&(this.cancel=e._createCancel.call(this),s+=this.opt.size+o),this.opt.readOnly?e._lock.call(this):(i.css("cursor","pointer"),e._binds.call(this)),!1!==this.opt.width&&i.css("width",s),e._target.call(this,this.opt.score),i.data({settings:this.opt,raty:!0})}))},_adjustPrecision:function(){this.opt.targetType="score",this.opt.half=!0},_apply:function(t){t&&t>0&&(t=e._between(t,0,this.opt.number),this.score.val(t)),e._fill.call(this,t),t&&e._roundStars.call(this,t)},_between:function(t,a,e){return Math.min(Math.max(parseFloat(t),a),e)},_binds:function(){this.cancel&&e._bindCancel.call(this),e._bindClick.call(this),e._bindOut.call(this),e._bindOver.call(this)},_bindCancel:function(){e._bindClickCancel.call(this),e._bindOutCancel.call(this),e._bindOverCancel.call(this)},_bindClick:function(){var t=this,e=a(t);t.stars.on("click.raty",(function(a){t.score.val(t.opt.half||t.opt.precision?e.data("score"):this.alt),t.opt.click&&t.opt.click.call(t,parseFloat(t.score.val()),a)}))},_bindClickCancel:function(){var t=this;t.cancel.on("click.raty",(function(a){t.score.removeAttr("value"),t.opt.click&&t.opt.click.call(t,null,a)}))},_bindOut:function(){var t=this;a(this).on("mouseleave.raty",(function(a){var i=parseFloat(t.score.val())||void 0;e._apply.call(t,i),e._target.call(t,i,a),t.opt.mouseout&&t.opt.mouseout.call(t,i,a)}))},_bindOutCancel:function(){var t=this;t.cancel.on("mouseleave.raty",(function(e){a(this).attr("src",t.opt.path+t.opt.cancelOff),t.opt.mouseout&&t.opt.mouseout.call(t,t.score.val()||null,e)}))},_bindOverCancel:function(){var t=this;t.cancel.on("mouseover.raty",(function(i){a(this).attr("src",t.opt.path+t.opt.cancelOn),t.stars.attr("src",t.opt.path+t.opt.starOff),e._target.call(t,null,i),t.opt.mouseover&&t.opt.mouseover.call(t,null)}))},_bindOver:function(){var t=this,i=a(t),o=t.opt.half?"mousemove.raty":"mouseover.raty";t.stars.on(o,(function(o){var s=parseInt(this.alt,10);if(t.opt.half){var r=parseFloat((o.pageX-a(this).offset().left)/t.opt.size),n=r>.5?1:.5;s=s-1+n,e._fill.call(t,s),t.opt.precision&&(s=s-n+r),e._roundStars.call(t,s),i.data("score",s)}else e._fill.call(t,s);e._target.call(t,s,o),t.opt.mouseover&&t.opt.mouseover.call(t,s,o)}))},_callback:function(t){for(i in t)"function"==typeof this.opt[t[i]]&&(this.opt[t[i]]=this.opt[t[i]].call(this))},_createCancel:function(){var t=a(this),e=this.opt.path+this.opt.cancelOff,i=a("<img />",{src:e,alt:"x",title:this.opt.cancelHint,class:"raty-cancel"});return"left"==this.opt.cancelPlace?t.prepend("&#160;").prepend(i):t.append("&#160;").append(i),i},_createScore:function(){return a("<input />",{type:"hidden",name:this.opt.scoreName}).appendTo(this)},_createStars:function(){for(var t=a(this),i=1;i<=this.opt.number;i++){var o=e._getHint.call(this,i),s=this.opt.score&&this.opt.score>=i?"starOn":"starOff";s=this.opt.path+this.opt[s],a("<img />",{src:s,alt:i,title:o}).appendTo(this),this.opt.space&&t.append(i<this.opt.number?"&#160;":"")}return t.children("img")},_error:function(t){a(this).html(t),a.error(t)},_fill:function(t){for(var a=this,e=0,i=1;i<=a.stars.length;i++){var o=a.stars.eq(i-1),s=a.opt.single?i==t:i<=t;if(a.opt.iconRange&&a.opt.iconRange.length>e){var r=a.opt.iconRange[e],n=r.on||a.opt.starOn,c=r.off||a.opt.starOff,l=s?n:c;i<=r.range&&o.attr("src",a.opt.path+l),i==r.range&&e++}else l=s?"starOn":"starOff",o.attr("src",this.opt.path+this.opt[l])}},_getHint:function(t){var a=this.opt.hints[t-1];return""===a?"":a||t},_lock:function(){var t=parseInt(this.score.val(),10),i=t?e._getHint.call(this,t):this.opt.noRatedMsg;a(this).data("readonly",!0).css("cursor","").attr("title",i),this.score.attr("readonly","readonly"),this.stars.attr("title",i),this.cancel&&this.cancel.hide()},_roundStars:function(t){var a=(t-Math.floor(t)).toFixed(2);if(a>this.opt.round.down){var e="starOn";this.opt.halfShow&&a<this.opt.round.up?e="starHalf":a<this.opt.round.full&&(e="starOff"),this.stars.eq(Math.ceil(t)-1).attr("src",this.opt.path+this.opt[e])}},_target:function(t,i){if(this.opt.target){var o=a(this.opt.target);0===o.length&&e._error.call(this,"Target selector invalid or missing!"),this.opt.targetFormat.indexOf("{score}")<0&&e._error.call(this,'Template "{score}" missing!');var s=i&&"mouseover"==i.type;void 0===t?t=this.opt.targetText:null===t?t=s?this.opt.cancelHint:this.opt.targetText:("hint"==this.opt.targetType?t=e._getHint.call(this,Math.ceil(t)):this.opt.precision&&(t=parseFloat(t).toFixed(1)),s||this.opt.targetKeep||(t=this.opt.targetText)),t&&(t=this.opt.targetFormat.toString().replace("{score}",t)),o.is(":input")?o.val(t):o.html(t)}},_unlock:function(){a(this).data("readonly",!1).css("cursor","pointer").removeAttr("title"),this.score.removeAttr("readonly","readonly");for(var t=0;t<this.opt.number;t++)this.stars.eq(t).attr("title",e._getHint.call(this,t+1));this.cancel&&this.cancel.css("display","")},cancel:function(t){return this.each((function(){!0!==a(this).data("readonly")&&(e[t?"click":"score"].call(this,null),this.score.removeAttr("value"))}))},click:function(t){return a(this).each((function(){!0!==a(this).data("readonly")&&(e._apply.call(this,t),this.opt.click||e._error.call(this,'You must add the "click: function(score, evt) { }" callback.'),this.opt.click.call(this,t,{type:"click"}),e._target.call(this,t))}))},destroy:function(){return a(this).each((function(){var t=a(this),e=t.data("raw");e?t.off(".raty").empty().css({cursor:e.style.cursor,width:e.style.width}).removeData("readonly"):t.data("raw",t.clone()[0])}))},getScore:function(){var t,e=[];return a(this).each((function(){t=this.score.val(),e.push(t?parseFloat(t):void 0)})),e.length>1?e:e[0]},readOnly:function(t){return this.each((function(){var i=a(this);i.data("readonly")!==t&&(t?(i.off(".raty").children("img").off(".raty"),e._lock.call(this)):(e._binds.call(this),e._unlock.call(this)),i.data("readonly",t))}))},reload:function(){return e.set.call(this,{})},score:function(){return arguments.length?e.setScore.apply(this,arguments):e.getScore.call(this)},set:function(t){return this.each((function(){var e=a(this),i=e.data("settings"),o=a.extend({},i,t);e.raty(o)}))},setScore:function(t){return a(this).each((function(){!0!==a(this).data("readonly")&&(e._apply.call(this,t),e._target.call(this,t))}))}},a.fn.raty=function(i){return e[i]?e[i].apply(this,Array.prototype.slice.call(arguments,1)):"object"!==t(i)&&i?void a.error("Method "+i+" does not exist!"):e.init.apply(this,arguments)},a.fn.raty.defaults={cancel:!1,cancelHint:"Cancel this rating!",cancelOff:"cancel-off.png",cancelOn:"cancel-on.png",cancelPlace:"left",click:void 0,half:!1,halfShow:!0,hints:["1/10","2/10","3/10","4/10","5/10","6/10","7/10","8/10","9/10","10/10"],iconRange:void 0,mouseout:void 0,mouseover:void 0,noRatedMsg:"Not rated yet!",number:10,numberMax:20,path:"/themes/motchill/images/",precision:!1,readOnly:!1,round:{down:.25,full:.6,up:.76},score:void 0,scoreName:"score",single:!1,size:16,space:!0,starHalf:"star-half.png",starOff:"star-off.png",starOn:"star-on.png",target:void 0,targetFormat:"{score}",targetKeep:!1,targetText:"",targetType:"hint",width:200}})();
+/******/ (() => { // webpackBootstrap
+/*!*************************************!*\
+  !*** ./resources/js/jquery.raty.js ***!
+  \*************************************/
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+/*!
+ * jQuery Raty - A Star Rating Plugin
+ * ------------------------------------------------------------------
+ *
+ * jQuery Raty is a plugin that generates a customizable star rating.
+ *
+ * Licensed under The MIT License
+ *
+ * @version        2.5.2
+ * @since          2010.06.11
+ * @author         Washington Botelho
+ * @documentation  wbotelhos.com/raty
+ *
+ * ------------------------------------------------------------------
+ *
+ *  <div id="star"></div>
+ *
+ *  $('#star').raty();
+ *
+ */
+
+;
+(function ($) {
+  var methods = {
+    init: function init(settings) {
+      return this.each(function () {
+        methods.destroy.call(this);
+        this.opt = $.extend(true, {}, $.fn.raty.defaults, settings);
+        var that = $(this),
+          inits = ['number', 'readOnly', 'score', 'scoreName'];
+        methods._callback.call(this, inits);
+        if (this.opt.precision) {
+          methods._adjustPrecision.call(this);
+        }
+        this.opt.number = methods._between(this.opt.number, 0, this.opt.numberMax);
+        this.opt.path = this.opt.path || '';
+        if (this.opt.path && this.opt.path.slice(this.opt.path.length - 1, this.opt.path.length) !== '/') {
+          this.opt.path += '/';
+        }
+        this.stars = methods._createStars.call(this);
+        this.score = methods._createScore.call(this);
+        methods._apply.call(this, this.opt.score);
+        var space = this.opt.space ? 4 : 0,
+          width = this.opt.width || this.opt.number * this.opt.size + this.opt.number * space;
+        if (this.opt.cancel) {
+          this.cancel = methods._createCancel.call(this);
+          width += this.opt.size + space;
+        }
+        if (this.opt.readOnly) {
+          methods._lock.call(this);
+        } else {
+          that.css('cursor', 'pointer');
+          methods._binds.call(this);
+        }
+        if (this.opt.width !== false) {
+          that.css('width', width);
+        }
+        methods._target.call(this, this.opt.score);
+        that.data({
+          'settings': this.opt,
+          'raty': true
+        });
+      });
+    },
+    _adjustPrecision: function _adjustPrecision() {
+      this.opt.targetType = 'score';
+      this.opt.half = true;
+    },
+    _apply: function _apply(score) {
+      if (score && score > 0) {
+        score = methods._between(score, 0, this.opt.number);
+        this.score.val(score);
+      }
+      methods._fill.call(this, score);
+      if (score) {
+        methods._roundStars.call(this, score);
+      }
+    },
+    _between: function _between(value, min, max) {
+      return Math.min(Math.max(parseFloat(value), min), max);
+    },
+    _binds: function _binds() {
+      if (this.cancel) {
+        methods._bindCancel.call(this);
+      }
+      methods._bindClick.call(this);
+      methods._bindOut.call(this);
+      methods._bindOver.call(this);
+    },
+    _bindCancel: function _bindCancel() {
+      methods._bindClickCancel.call(this);
+      methods._bindOutCancel.call(this);
+      methods._bindOverCancel.call(this);
+    },
+    _bindClick: function _bindClick() {
+      var self = this,
+        that = $(self);
+      self.stars.on('click.raty', function (evt) {
+        self.score.val(self.opt.half || self.opt.precision ? that.data('score') : this.alt);
+        if (self.opt.click) {
+          self.opt.click.call(self, parseFloat(self.score.val()), evt);
+        }
+      });
+    },
+    _bindClickCancel: function _bindClickCancel() {
+      var self = this;
+      self.cancel.on('click.raty', function (evt) {
+        self.score.removeAttr('value');
+        if (self.opt.click) {
+          self.opt.click.call(self, null, evt);
+        }
+      });
+    },
+    _bindOut: function _bindOut() {
+      var self = this;
+      $(this).on('mouseleave.raty', function (evt) {
+        var score = parseFloat(self.score.val()) || undefined;
+        methods._apply.call(self, score);
+        methods._target.call(self, score, evt);
+        if (self.opt.mouseout) {
+          self.opt.mouseout.call(self, score, evt);
+        }
+      });
+    },
+    _bindOutCancel: function _bindOutCancel() {
+      var self = this;
+      self.cancel.on('mouseleave.raty', function (evt) {
+        $(this).attr('src', self.opt.path + self.opt.cancelOff);
+        if (self.opt.mouseout) {
+          self.opt.mouseout.call(self, self.score.val() || null, evt);
+        }
+      });
+    },
+    _bindOverCancel: function _bindOverCancel() {
+      var self = this;
+      self.cancel.on('mouseover.raty', function (evt) {
+        $(this).attr('src', self.opt.path + self.opt.cancelOn);
+        self.stars.attr('src', self.opt.path + self.opt.starOff);
+        methods._target.call(self, null, evt);
+        if (self.opt.mouseover) {
+          self.opt.mouseover.call(self, null);
+        }
+      });
+    },
+    _bindOver: function _bindOver() {
+      var self = this,
+        that = $(self),
+        action = self.opt.half ? 'mousemove.raty' : 'mouseover.raty';
+      self.stars.on(action, function (evt) {
+        var score = parseInt(this.alt, 10);
+        if (self.opt.half) {
+          var position = parseFloat((evt.pageX - $(this).offset().left) / self.opt.size),
+            plus = position > .5 ? 1 : .5;
+          score = score - 1 + plus;
+          methods._fill.call(self, score);
+          if (self.opt.precision) {
+            score = score - plus + position;
+          }
+          methods._roundStars.call(self, score);
+          that.data('score', score);
+        } else {
+          methods._fill.call(self, score);
+        }
+        methods._target.call(self, score, evt);
+        if (self.opt.mouseover) {
+          self.opt.mouseover.call(self, score, evt);
+        }
+      });
+    },
+    _callback: function _callback(options) {
+      for (i in options) {
+        if (typeof this.opt[options[i]] === 'function') {
+          this.opt[options[i]] = this.opt[options[i]].call(this);
+        }
+      }
+    },
+    _createCancel: function _createCancel() {
+      var that = $(this),
+        icon = this.opt.path + this.opt.cancelOff,
+        cancel = $('<img />', {
+          src: icon,
+          alt: 'x',
+          title: this.opt.cancelHint,
+          'class': 'raty-cancel'
+        });
+      if (this.opt.cancelPlace == 'left') {
+        that.prepend('&#160;').prepend(cancel);
+      } else {
+        that.append('&#160;').append(cancel);
+      }
+      return cancel;
+    },
+    _createScore: function _createScore() {
+      return $('<input />', {
+        type: 'hidden',
+        name: this.opt.scoreName
+      }).appendTo(this);
+    },
+    _createStars: function _createStars() {
+      var that = $(this);
+      for (var i = 1; i <= this.opt.number; i++) {
+        var title = methods._getHint.call(this, i),
+          icon = this.opt.score && this.opt.score >= i ? 'starOn' : 'starOff';
+        icon = this.opt.path + this.opt[icon];
+        $('<img />', {
+          src: icon,
+          alt: i,
+          title: title
+        }).appendTo(this);
+        if (this.opt.space) {
+          that.append(i < this.opt.number ? '&#160;' : '');
+        }
+      }
+      return that.children('img');
+    },
+    _error: function _error(message) {
+      $(this).html(message);
+      $.error(message);
+    },
+    _fill: function _fill(score) {
+      var self = this,
+        hash = 0;
+      for (var i = 1; i <= self.stars.length; i++) {
+        var star = self.stars.eq(i - 1),
+          select = self.opt.single ? i == score : i <= score;
+        if (self.opt.iconRange && self.opt.iconRange.length > hash) {
+          var irange = self.opt.iconRange[hash],
+            on = irange.on || self.opt.starOn,
+            off = irange.off || self.opt.starOff,
+            icon = select ? on : off;
+          if (i <= irange.range) {
+            star.attr('src', self.opt.path + icon);
+          }
+          if (i == irange.range) {
+            hash++;
+          }
+        } else {
+          var icon = select ? 'starOn' : 'starOff';
+          star.attr('src', this.opt.path + this.opt[icon]);
+        }
+      }
+    },
+    _getHint: function _getHint(score) {
+      var hint = this.opt.hints[score - 1];
+      return hint === '' ? '' : hint || score;
+    },
+    _lock: function _lock() {
+      var score = parseInt(this.score.val(), 10),
+        // TODO: 3.1 >> [['1'], ['2'], ['3', '.1', '.2']]
+        hint = score ? methods._getHint.call(this, score) : this.opt.noRatedMsg;
+      $(this).data('readonly', true).css('cursor', '').attr('title', hint);
+      this.score.attr('readonly', 'readonly');
+      this.stars.attr('title', hint);
+      if (this.cancel) {
+        this.cancel.hide();
+      }
+    },
+    _roundStars: function _roundStars(score) {
+      var rest = (score - Math.floor(score)).toFixed(2);
+      if (rest > this.opt.round.down) {
+        var icon = 'starOn'; // Up:   [x.76 .. x.99]
+
+        if (this.opt.halfShow && rest < this.opt.round.up) {
+          // Half: [x.26 .. x.75]
+          icon = 'starHalf';
+        } else if (rest < this.opt.round.full) {
+          // Down: [x.00 .. x.5]
+          icon = 'starOff';
+        }
+        this.stars.eq(Math.ceil(score) - 1).attr('src', this.opt.path + this.opt[icon]);
+      } // Full down: [x.00 .. x.25]
+    },
+    _target: function _target(score, evt) {
+      if (this.opt.target) {
+        var target = $(this.opt.target);
+        if (target.length === 0) {
+          methods._error.call(this, 'Target selector invalid or missing!');
+        }
+        if (this.opt.targetFormat.indexOf('{score}') < 0) {
+          methods._error.call(this, 'Template "{score}" missing!');
+        }
+        var mouseover = evt && evt.type == 'mouseover';
+        if (score === undefined) {
+          score = this.opt.targetText;
+        } else if (score === null) {
+          score = mouseover ? this.opt.cancelHint : this.opt.targetText;
+        } else {
+          if (this.opt.targetType == 'hint') {
+            score = methods._getHint.call(this, Math.ceil(score));
+          } else if (this.opt.precision) {
+            score = parseFloat(score).toFixed(1);
+          }
+          if (!mouseover && !this.opt.targetKeep) {
+            score = this.opt.targetText;
+          }
+        }
+        if (score) {
+          score = this.opt.targetFormat.toString().replace('{score}', score);
+        }
+        if (target.is(':input')) {
+          target.val(score);
+        } else {
+          target.html(score);
+        }
+      }
+    },
+    _unlock: function _unlock() {
+      $(this).data('readonly', false).css('cursor', 'pointer').removeAttr('title');
+      this.score.removeAttr('readonly', 'readonly');
+      for (var i = 0; i < this.opt.number; i++) {
+        this.stars.eq(i).attr('title', methods._getHint.call(this, i + 1));
+      }
+      if (this.cancel) {
+        this.cancel.css('display', '');
+      }
+    },
+    cancel: function cancel(click) {
+      return this.each(function () {
+        if ($(this).data('readonly') !== true) {
+          methods[click ? 'click' : 'score'].call(this, null);
+          this.score.removeAttr('value');
+        }
+      });
+    },
+    click: function click(score) {
+      return $(this).each(function () {
+        if ($(this).data('readonly') !== true) {
+          methods._apply.call(this, score);
+          if (!this.opt.click) {
+            methods._error.call(this, 'You must add the "click: function(score, evt) { }" callback.');
+          }
+          this.opt.click.call(this, score, {
+            type: 'click'
+          });
+          methods._target.call(this, score);
+        }
+      });
+    },
+    destroy: function destroy() {
+      return $(this).each(function () {
+        var that = $(this),
+          raw = that.data('raw');
+        if (raw) {
+          that.off('.raty').empty().css({
+            cursor: raw.style.cursor,
+            width: raw.style.width
+          }).removeData('readonly');
+        } else {
+          that.data('raw', that.clone()[0]);
+        }
+      });
+    },
+    getScore: function getScore() {
+      var score = [],
+        value;
+      $(this).each(function () {
+        value = this.score.val();
+        score.push(value ? parseFloat(value) : undefined);
+      });
+      return score.length > 1 ? score : score[0];
+    },
+    readOnly: function readOnly(readonly) {
+      return this.each(function () {
+        var that = $(this);
+        if (that.data('readonly') !== readonly) {
+          if (readonly) {
+            that.off('.raty').children('img').off('.raty');
+            methods._lock.call(this);
+          } else {
+            methods._binds.call(this);
+            methods._unlock.call(this);
+          }
+          that.data('readonly', readonly);
+        }
+      });
+    },
+    reload: function reload() {
+      return methods.set.call(this, {});
+    },
+    score: function score() {
+      return arguments.length ? methods.setScore.apply(this, arguments) : methods.getScore.call(this);
+    },
+    set: function set(settings) {
+      return this.each(function () {
+        var that = $(this),
+          actual = that.data('settings'),
+          news = $.extend({}, actual, settings);
+        that.raty(news);
+      });
+    },
+    setScore: function setScore(score) {
+      return $(this).each(function () {
+        if ($(this).data('readonly') !== true) {
+          methods._apply.call(this, score);
+          methods._target.call(this, score);
+        }
+      });
+    }
+  };
+  $.fn.raty = function (method) {
+    if (methods[method]) {
+      return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
+    } else if (_typeof(method) === 'object' || !method) {
+      return methods.init.apply(this, arguments);
+    } else {
+      $.error('Method ' + method + ' does not exist!');
+    }
+  };
+  $.fn.raty.defaults = {
+    cancel: false,
+    cancelHint: 'Cancel this rating!',
+    cancelOff: 'cancel-off.png',
+    cancelOn: 'cancel-on.png',
+    cancelPlace: 'left',
+    click: undefined,
+    half: false,
+    halfShow: true,
+    hints: ['1/10', '2/10', '3/10', '4/10', '5/10', '6/10', '7/10', '8/10', '9/10', '10/10'],
+    iconRange: undefined,
+    mouseout: undefined,
+    mouseover: undefined,
+    noRatedMsg: 'Not rated yet!',
+    number: 10,
+    numberMax: 20,
+    path: '/themes/motchill/images/',
+    precision: false,
+    readOnly: false,
+    round: {
+      down: .25,
+      full: .6,
+      up: .76
+    },
+    score: undefined,
+    scoreName: 'score',
+    single: false,
+    size: 16,
+    space: true,
+    starHalf: 'star-half.png',
+    starOff: 'star-off.png',
+    starOn: 'star-on.png',
+    target: undefined,
+    targetFormat: '{score}',
+    targetKeep: false,
+    targetText: '',
+    targetType: 'hint',
+    width: 200
+  };
+})(jQuery);
+/******/ })()
+;
