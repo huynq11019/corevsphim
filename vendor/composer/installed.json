@@ -5034,62 +5034,6 @@
             "install-path": "../nikic/php-parser"
         },
         {
-            "name": "nqt/theme-thempho",
-            "version": "dev-main",
-            "version_normalized": "dev-main",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/onezoroone/theme1.git",
-                "reference": "cbd6b4788e78fca1d0a98a5527be58b83ef7d839"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/onezoroone/theme1/zipball/cbd6b4788e78fca1d0a98a5527be58b83ef7d839",
-                "reference": "cbd6b4788e78fca1d0a98a5527be58b83ef7d839",
-                "shasum": ""
-            },
-            "require": {
-                "ckfinder/ckfinder-laravel-package": "v3.5.2.1",
-                "hacoidev/ophim-core": "^1.0.0",
-                "laravel/framework": "^6|^7|^8",
-                "laravel/socialite": "*"
-            },
-            "time": "2025-04-28T14:33:51+00:00",
-            "default-branch": true,
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "NQT\\ThemeThemPho\\ThemeThemPhoServiceProvider"
-                    ]
-                }
-            },
-            "installation-source": "dist",
-            "autoload": {
-                "psr-4": {
-                    "NQT\\ThemeThemPho\\": "src/",
-                    "NQT\\ThemeThemPho\\Database\\Seeders\\": "database/seeders/",
-                    "NQT\\ThemeThemPho\\Database\\Factories\\": "database/factories/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "nqt",
-                    "email": "truyen3oads@gmail.com"
-                }
-            ],
-            "description": "NQT's thempho theme",
-            "support": {
-                "issues": "https://github.com/onezoroone/theme1/issues",
-                "source": "https://github.com/onezoroone/theme1/tree/main"
-            },
-            "install-path": "../nqt/theme-thempho"
-        },
-        {
             "name": "nunomaduro/collision",
             "version": "v5.11.0",
             "version_normalized": "5.11.0.0",
