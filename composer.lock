@@ -4183,58 +4183,6 @@
             "time": "2024-07-01T20:03:41+00:00"
         },
         {
-            "name": "ophimcms/theme-motchill",
-            "version": "1.2.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/phantom0803/ophim-theme-motchill.git",
-                "reference": "801f95725740451dd0e62fd8da265c4c1922225f"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/phantom0803/ophim-theme-motchill/zipball/801f95725740451dd0e62fd8da265c4c1922225f",
-                "reference": "801f95725740451dd0e62fd8da265c4c1922225f",
-                "shasum": ""
-            },
-            "require": {
-                "ckfinder/ckfinder-laravel-package": "v3.5.2.1",
-                "hacoidev/ophim-core": "^1.0.0",
-                "jenssegers/agent": "^2.6",
-                "laravel/framework": "^6|^7|^8"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Ophim\\ThemeMotchill\\ThemeMotchillServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Ophim\\ThemeMotchill\\": "src/",
-                    "Ophim\\ThemeMotchill\\Database\\Seeders\\": "database/seeders/",
-                    "Ophim\\ThemeMotchill\\Database\\Factories\\": "database/factories/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "ophimcms",
-                    "email": "opdlnf01@gmail.com"
-                }
-            ],
-            "description": "Ophim's motchill theme",
-            "support": {
-                "issues": "https://github.com/phantom0803/ophim-theme-motchill/issues",
-                "source": "https://github.com/phantom0803/ophim-theme-motchill/tree/1.2.1"
-            },
-            "time": "2023-06-12T05:48:24+00:00"
-        },
-        {
             "name": "opis/closure",
             "version": "3.6.3",
             "source": {
