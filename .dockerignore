@@ -1,0 +1,21 @@
+# Add Docker-specific ignores
+.env.docker
+docker-compose.override.yml
+docker/logs/
+docker/data/
+
+# Docker volumes
+dbdata/
+
+# Keep existing Laravel ignores
+node_modules/
+vendor/
+.env
+.env.backup
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+/.idea
+/.vscode
