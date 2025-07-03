@@ -236,7 +236,23 @@ class AuthController extends Controller
         $comment->episode_id = $request->episode_id;
         $comment->save();
 
-        return response()->json(['status' => 'success', 'message' => 'Bình luận thành công', 'html' => $html]);
+        // Load lại comment với thông tin user để trả về
+        $comment->load('user');
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Bình luận thành công',
+            'comment' => [
+                'id' => $comment->id,
+                'content' => $comment->content,
+                'created_at' => $comment->created_at,
+                'user' => [
+                    'id' => $comment->user->id,
+                    'name' => $comment->user->name,
+                    'avatar' => $comment->user->avatar ?? '/themes/thempho/images/default.jpg'
+                ]
+            ]
+        ]);
     }
 
     public function loadMoreComment(Request $request)

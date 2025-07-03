@@ -113,3 +113,10 @@ docker system prune -a
 # Start fresh
 ./docker-setup.sh
 ```
+
+sau khi update 
+cd /Users/macbookpro/Documents/freelance/corevsphim && php artisan view:clear
+
+cd /Users/macbookpro/Documents/freelance/corevsphim && php artisan config:clear
+cd /Users/macbookpro/Documents/freelance/corevsphim && php artisan route:clear
+cd /Users/macbookpro/Documents/freelance/corevsphim && php artisan optimize:clear
