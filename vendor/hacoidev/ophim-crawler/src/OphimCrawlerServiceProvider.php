@@ -25,7 +25,7 @@ class OphimCrawlerServiceProvider extends SP
         config(['plugins' => array_merge(config('plugins', []), [
             'hacoidev/ophim-crawler' =>
             [
-                'name' => 'Ophim Crawler Mod VSPHIM',
+                'name' => 'Ophim Crawler',
                 'package_name' => 'hacoidev/ophim-crawler',
                 'icon' => 'la la-hand-grab-o',
                 'entries' => [
@@ -46,7 +46,7 @@ class OphimCrawlerServiceProvider extends SP
 
         config(['ophim.updaters' => array_merge(config('ophim.updaters', []), [
             [
-                'name' => 'Ophim Crawler Mod VSPHIM',
+                'name' => 'Ophim Crawler',
                 'handler' => 'Ophim\Crawler\OphimCrawler\Crawler'
             ]
         ])]);

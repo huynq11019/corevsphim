@@ -35,7 +35,7 @@
                                 </select>
                                 <button class="btn btn-sm btn-primary" id="movies-get-handle">Lấy danh sách</button>
                             </div>
-                            <textarea class="form-control" rows="5" name="link">https://nguon.vsphim.com/api/danh-sach/phim-moi-cap-nhat</textarea>
+                            <textarea class="form-control" rows="5" name="link">https://ophim1.com/danh-sach/phim-moi-cap-nhat</textarea>
                             <small><i>Mỗi link cách nhau 1 dòng</i></small>
                         </div>
                         <div class="form-group col-12">
@@ -544,7 +544,7 @@
         }
 
         $("#movies-get-handle").click(async function() {
-            const apiDomain = "{{ config('ophim_crawler.domain', 'https://nguon.vsphim.com/api') }}";
+            const apiDomain = "{{ config('ophim_crawler.domain', 'https://ophim1.com') }}";
             let params = $("select[name=movies-get-params]").find(":selected").val();
 
             const response = await fetch("{{ backpack_url('plugin/ophim-crawler/get-movies') }}", {

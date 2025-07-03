@@ -56,12 +56,12 @@ class Option
         $regions = [];
         try {
             $categories = Cache::remember('ophim_categories', 86400, function () {
-                $data = json_decode(file_get_contents(sprintf('%s/the-loai', config('ophim_crawler.domain', 'https://nguon.vsphim.com/api'))), true) ?? [];
+                $data = json_decode(file_get_contents(sprintf('%s/the-loai', config('ophim_crawler.domain', 'https://ophim1.com'))), true) ?? [];
                 return collect($data)->pluck('name', 'name')->toArray();
             });
 
             $regions = Cache::remember('ophim_regions', 86400, function () {
-                $data = json_decode(file_get_contents(sprintf('%s/quoc-gia', config('ophim_crawler.domain', 'https://nguon.vsphim.com/api'))), true) ?? [];
+                $data = json_decode(file_get_contents(sprintf('%s/quoc-gia', config('ophim_crawler.domain', 'https://ophim1.com'))), true) ?? [];
                 return collect($data)->pluck('name', 'name')->toArray();
             });
         } catch (\Throwable $th) {
@@ -102,7 +102,7 @@ class Option
                 'name' => 'domain',
                 'label' => 'API Domain',
                 'type' => 'text',
-                'value' => 'https://nguon.vsphim.com/api',
+                'value' => 'https://ophim1.com',
                 'tab' => 'Setting'
             ],
             'download_image' => [
