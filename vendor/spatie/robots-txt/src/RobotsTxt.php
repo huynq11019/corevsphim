@@ -8,6 +8,10 @@ class RobotsTxt
 
     protected array $disallowsPerUserAgent = [];
 
+    protected array $allowsPerUserAgent = [];
+
+    protected array $crawlDelaysPerUserAgent = [];
+
     protected bool $matchExactly = true;
 
     protected bool $includeGlobalGroup = true;
@@ -50,6 +54,8 @@ class RobotsTxt
     public function __construct(string $content)
     {
         $this->disallowsPerUserAgent = $this->getDisallowsPerUserAgent($content);
+        $this->allowsPerUserAgent = $this->getAllowsPerUserAgent($content);
+        $this->crawlDelaysPerUserAgent = $this->getCrawlDelaysPerUserAgent($content);
     }
 
     public static function create(string $source): self
@@ -64,7 +70,7 @@ class RobotsTxt
         return new self($source);
     }
 
-    public function allows(string $url, string | null $userAgent = '*'): bool
+    public function allows(string $url, ?string $userAgent = '*'): bool
     {
         $requestUri = '';
 
@@ -83,16 +89,97 @@ class RobotsTxt
         }
 
         $disallowsPerUserAgent = $this->includeGlobalGroup
-            ? $this->disallowsPerUserAgent 
+            ? $this->disallowsPerUserAgent
             : array_filter($this->disallowsPerUserAgent, fn ($key) => $key !== '*', ARRAY_FILTER_USE_KEY);
-        
+
+        $allowsPerUserAgent = $this->includeGlobalGroup
+            ? $this->allowsPerUserAgent
+            : array_filter($this->allowsPerUserAgent, fn ($key) => $key !== '*', ARRAY_FILTER_USE_KEY);
+
         $normalizedUserAgent = strtolower(trim($userAgent ?? ''));
-            
+
         $disallows = $this->matchExactly
             ? $this->getDisallowsExactly($normalizedUserAgent, $disallowsPerUserAgent)
             : $this->getDisallowsContaining($normalizedUserAgent, $disallowsPerUserAgent);
 
-        return ! $this->pathIsDenied($requestUri, $disallows);
+        $allows = $this->matchExactly
+            ? $this->getDisallowsExactly($normalizedUserAgent, $allowsPerUserAgent)
+            : $this->getDisallowsContaining($normalizedUserAgent, $allowsPerUserAgent);
+
+        if ($this->pathIsExplicitAllowed($url, $allows)) {
+            return true;
+        }
+
+        $isDenied = $this->pathIsDenied($requestUri, $disallows);
+        if ($isDenied) {
+            $isAllowedWeight = $this->pathMatchWeight($requestUri, $allows);
+            if ($isAllowedWeight === 0) {
+                return false;
+            }
+            $isDisallowedWeight = $this->pathMatchWeight($requestUri, $disallows);
+
+            return $isAllowedWeight > $isDisallowedWeight;
+        }
+
+        return ! $isDenied;
+    }
+
+    /**
+     * @return Disallow[]|null Null if path is allowed, or a list of reasons if path is disallowed
+     */
+    public function whyDisallows(string $path, string $userAgent): ?array {
+        if ($this->allows($path, $userAgent)) {
+            return null;
+        }
+        $reasons = $this->getDisallows($path, $userAgent);
+        if ($userAgent !== '*') {
+            $newDisallows = $this->getDisallows($path, '*');
+            $reasons = array_merge($reasons, $newDisallows);
+        }
+        return $reasons;
+    }
+
+    /**
+     * @return Disallow[]
+     */
+    protected function getDisallows(string $path, string $userAgent): array {
+        $reasons = [];
+        foreach ($this->disallowsPerUserAgent[$userAgent] as $disallowedPath => $length) {
+            if (str_starts_with($path, $disallowedPath)) {
+                $reasons[] = new Disallow($userAgent, $disallowedPath);
+            }
+        }
+        return $reasons;
+    }
+
+    public function crawlDelay(string $userAgent = '*'): ?string
+    {
+        $crawlDelaysPerUserAgent = $this->includeGlobalGroup
+            ? $this->crawlDelaysPerUserAgent
+            : array_filter($this->crawlDelaysPerUserAgent, fn ($key) => $key !== '*', ARRAY_FILTER_USE_KEY);
+
+        $normalizedUserAgent = strtolower(trim($userAgent ?? ''));
+
+        if (isset($crawlDelaysPerUserAgent[$normalizedUserAgent])) {
+            return $crawlDelaysPerUserAgent[$normalizedUserAgent];
+        } elseif (isset($crawlDelaysPerUserAgent['*'])) {
+            return $crawlDelaysPerUserAgent['*'];
+        }
+
+        return null;
+    }
+
+    protected function pathMatchWeight(string $requestUri, array $itemsPerUseragent): int
+    {
+        $weight = 0;
+        foreach ($itemsPerUseragent as $item => $strlen) {
+            $startsWith = str_starts_with($requestUri, $item);
+            if ($startsWith && $strlen > $weight) {
+                $weight = (int) $strlen;
+            }
+        }
+
+        return $weight;
     }
 
     protected function getDisallowsExactly(string $userAgent, array $disallowsPerUserAgent): array
@@ -115,9 +202,14 @@ class RobotsTxt
         return $disallows;
     }
 
+    protected function pathIsExplicitAllowed(string $requestUri, array $allows): bool
+    {
+        return in_array($requestUri, array_keys($allows));
+    }
+
     protected function pathIsDenied(string $requestUri, array $disallows): bool
     {
-        foreach ($disallows as $disallow) {
+        foreach ($disallows as $disallow => $value) {
             if ($disallow === '') {
                 continue;
             }
@@ -224,11 +316,113 @@ class RobotsTxt
             $disallowUrl = $this->parseDisallow($line);
 
             foreach ($currentUserAgents as &$currentUserAgent) {
-                $currentUserAgent[$disallowUrl] = $disallowUrl;
+                $currentUserAgent[$disallowUrl] = strlen($disallowUrl);
             }
         }
 
         return $disallowsPerUserAgent;
+    }
+
+    protected function getAllowsPerUserAgent(string $content): array
+    {
+        $lines = explode(PHP_EOL, $content);
+
+        $lines = array_filter($lines);
+
+        $allowsPerUserAgent = [];
+
+        $currentUserAgents = [];
+
+        $treatAllowDisallowLine = false;
+
+        foreach ($lines as $line) {
+            if ($this->isComment($line)) {
+                continue;
+            }
+
+            if ($this->isEmptyLine($line)) {
+                continue;
+            }
+
+            if ($this->isUserAgentLine($line)) {
+                if ($treatAllowDisallowLine) {
+                    $treatAllowDisallowLine = false;
+                    $currentUserAgents = [];
+                }
+                $allowsPerUserAgent[$this->parseUserAgent($line)] = [];
+
+                $currentUserAgents[] = &$allowsPerUserAgent[$this->parseUserAgent($line)];
+
+                continue;
+            }
+
+            if ($this->isDisallowLine($line)) {
+                $treatAllowDisallowLine = true;
+
+                continue;
+            }
+
+            if ($this->isAllowLine($line)) {
+                $treatAllowDisallowLine = true;
+
+            }
+
+            $allowUrl = $this->parseAllow($line);
+
+            foreach ($currentUserAgents as &$currentUserAgent) {
+                $currentUserAgent[$allowUrl] = strlen($allowUrl);
+            }
+        }
+        $allowsPerUserAgent = array_filter($allowsPerUserAgent, function ($item) {
+            return count($item) > 0;
+        });
+
+        return $allowsPerUserAgent;
+    }
+
+    protected function getCrawlDelaysPerUserAgent(string $content): array
+    {
+        $lines = explode(PHP_EOL, $content);
+
+        $lines = array_filter($lines);
+
+        $crawlDelaysPerUserAgent = [];
+
+        $currentUserAgents = [];
+        $isUserAgentListGoing = false;
+
+        foreach ($lines as $line) {
+            if ($this->isComment($line)) {
+                continue;
+            }
+
+            if ($this->isEmptyLine($line)) {
+                continue;
+            }
+
+            if ($this->isUserAgentLine($line)) {
+                if (! $isUserAgentListGoing) {
+                    $isUserAgentListGoing = true;
+                    $currentUserAgents = [];
+                }
+                $userAgent = $this->parseUserAgent($line);
+
+                $currentUserAgents[] = $userAgent;
+
+                continue;
+            }
+            $isUserAgentListGoing = false;
+
+            if ($this->isCrawlDelayLine($line)) {
+                $crawlDelay = $this->parseCrawlDelay($line);
+                foreach ($currentUserAgents as $currentUserAgent) {
+                    $crawlDelaysPerUserAgent[$currentUserAgent] = $crawlDelay;
+                }
+            }
+
+        }
+
+        return $crawlDelaysPerUserAgent;
     }
 
     protected function isComment(string $line): bool
@@ -253,7 +447,17 @@ class RobotsTxt
 
     protected function parseDisallow(string $line): string
     {
-        return trim(substr_replace(strtolower(trim($line)), '', 0, 8), ': ');
+        return trim(substr_replace(trim($line), '', 0, 8), ': ');
+    }
+
+    protected function parseAllow(string $line): string
+    {
+        return trim(substr_replace(trim($line), '', 0, 6), ': ');
+    }
+
+    protected function parseCrawlDelay(string $line): string
+    {
+        return trim(substr_replace(trim($line), '', 0, 11), ': ');
     }
 
     protected function isDisallowLine(string $line): string
@@ -264,5 +468,10 @@ class RobotsTxt
     protected function isAllowLine(string $line): string
     {
         return trim(substr(str_replace(' ', '', strtolower(trim($line))), 0, 6), ': ') === 'allow';
+    }
+
+    protected function isCrawlDelayLine(string $line): string
+    {
+        return trim(substr(str_replace(' ', '', strtolower(trim($line))), 0, 11), ': ') === 'crawl-delay';
     }
 }
