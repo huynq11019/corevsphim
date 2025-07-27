@@ -44,7 +44,7 @@ class Option
             'key' => 'hacoidev/ophim-crawler.options',
         ], [
             'name' => 'Options',
-            'field' => json_encode(['name' => 'value', 'type', 'hidden']),
+            'field' => json_encode(['name' => 'value', 'type' => 'hidden']),
             'group' => 'crawler',
             'active' => false
         ]);
@@ -103,6 +103,38 @@ class Option
                 'label' => 'API Domain',
                 'type' => 'text',
                 'value' => 'https://ophim1.com',
+                'tab' => 'Setting'
+            ],
+            'domain_nguonc' => [
+                'name' => 'domain_nguonc',
+                'label' => 'Nguonc API Domain',
+                'type' => 'text',
+                'value' => 'https://phim.nguonc.com',
+                'tab' => 'Setting'
+            ],
+            'domain_kkphim' => [
+                'name' => 'domain_kkphim',
+                'label' => 'KKPhim API Domain',
+                'type' => 'text',
+                'value' => 'https://phimapi.com',
+                'tab' => 'Setting'
+            ],
+            'crawler_ophim_enable' => [
+                'name' => 'crawler_ophim_enable',
+                'label' => 'Bật crawler Ophim',
+                'type' => 'checkbox',
+                'tab' => 'Setting'
+            ],
+            'crawler_nguonc_enable' => [
+                'name' => 'crawler_nguonc_enable',
+                'label' => 'Bật crawler Nguonc',
+                'type' => 'checkbox',
+                'tab' => 'Setting'
+            ],
+            'crawler_kkphim_enable' => [
+                'name' => 'crawler_kkphim_enable',
+                'label' => 'Bật crawler KKPhim',
+                'type' => 'checkbox',
                 'tab' => 'Setting'
             ],
             'download_image' => [

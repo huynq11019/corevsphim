@@ -39,7 +39,12 @@ class CrawlerSettingController extends CrudController
 
         CRUD::addField(['name' => 'fields', 'type' => 'hidden', 'value' => collect(Option::getAllOptions())->implode('name', ',')]);
 
-        foreach (Option::getAllOptions() as $field) {
+        foreach (Option::getAllOptions() as $key => $field) {
+            // Validate field has required 'name' key before adding
+            if (!isset($field['name']) || empty($field['name'])) {
+                \Log::error('Field missing name key in getAllOptions()', ['key' => $key, 'field' => $field]);
+                continue; // Skip this field
+            }
             CRUD::addField($field);
         }
 
@@ -98,7 +103,16 @@ class CrawlerSettingController extends CrudController
         $options = json_decode($entry->value, true) ?? [];
 
         foreach ($options as $k => $v) {
-            $fields[$k]['value'] = $v;
+            // Only set value for fields that exist in the field definitions
+            if (array_key_exists($k, $fields)) {
+                $fields[$k]['value'] = $v;
+            } else {
+                // Log the field that doesn't have a definition
+                \Log::warning('Field exists in database but not in field definitions', [
+                    'field_name' => $k,
+                    'value' => $v
+                ]);
+            }
         }
 
         if (!array_key_exists('id', $fields)) {

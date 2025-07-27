@@ -69,6 +69,12 @@ trait FieldsProtectedMethods
      */
     public function overwriteFieldNameFromDotNotationToArray($field)
     {
+        // Add validation to prevent undefined array key error
+        if (!isset($field['name'])) {
+            \Log::error('Field missing name key in overwriteFieldNameFromDotNotationToArray', ['field' => $field]);
+            return $field;
+        }
+
         if (! is_array($field['name']) && strpos($field['name'], '.') !== false) {
             $entity_array = explode('.', $field['name']);
             $name_string = '';
