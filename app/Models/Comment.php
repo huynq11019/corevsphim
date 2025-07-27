@@ -18,6 +18,7 @@ class Comment extends Model
         'like',
         'dislike',
         'report',
+        'is_anonymous',
     ];
 
     public function user()

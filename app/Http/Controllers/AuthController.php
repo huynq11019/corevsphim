@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
@@ -218,23 +219,58 @@ class AuthController extends Controller
 
     public function comment(Request $request)
     {
-        if(!Auth::check()){
-            return response()->json(['status' => 'error', 'message' => 'Vui lòng đăng nhập để bình luận']);
-        }
+        \Log::info('Comment request received', $request->all());
 
         $request->validate([
             'content' => 'required',
+            'movie_id' => 'required|integer',
+            'parent_id' => 'nullable|integer',
+            'episode_id' => 'nullable|integer',
+            'is_anonymous' => 'nullable|in:true,false,1,0'
         ], [
             'content.required' => 'Vui lòng nhập nội dung bình luận',
+            'movie_id.required' => 'Movie ID là bắt buộc',
+            'movie_id.integer' => 'Movie ID phải là số nguyên',
         ]);
 
-        $comment = new Comment;
-        $comment->user_id = Auth::id();
-        $comment->movie_id = $request->movie_id;
-        $comment->content = $request->content;
-        $comment->parent_id = $request->parent_id;
-        $comment->episode_id = $request->episode_id;
-        $comment->save();
+        $isAnonymous = filter_var($request->is_anonymous, FILTER_VALIDATE_BOOLEAN);
+
+        // Nếu user chưa đăng nhập, tự động bình luận ẩn danh
+        if (!Auth::check()) {
+            $isAnonymous = true;
+        }
+
+        $commentData = [
+            'movie_id' => $request->movie_id,
+            'content' => $request->content,
+            'parent_id' => $request->parent_id,
+            'episode_id' => $request->episode_id,
+            'is_anonymous' => $isAnonymous,
+        ];
+
+        // Nếu user đã đăng nhập, lưu user_id
+        if ($commentData['is_anonymous'] === false && Auth::check()) {
+            $commentData['user_id'] = Auth::id();
+        } elseif ($commentData['is_anonymous'] === true) {
+            //. 8 là ID của user ẩn danh, bạn có thể thay đổi theo ý muốn
+            $commentData['user_id'] = 8; // Không lưu user_id nếu bình luận ẩn danh
+        }
+        // if (Auth::check()) {
+        //     $commentData['user_id'] = Auth::id();
+        // }
+
+        $comment = new Comment($commentData);
+
+        try {
+            $comment->save();
+            Log::info('Comment saved', ['comment_id' => $comment->id]);
+        } catch (\Exception $e) {
+            Log::error('Failed to save comment', ['error' => $e->getMessage()]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Không thể lưu bình luận'
+            ], 500);
+        }
 
         // Load lại comment với thông tin user để trả về
         $comment->load('user');
@@ -246,11 +282,13 @@ class AuthController extends Controller
                 'id' => $comment->id,
                 'content' => $comment->content,
                 'created_at' => $comment->created_at,
-                'user' => [
+                'parent_id' => $comment->parent_id,
+                'is_anonymous' => $comment->is_anonymous,
+                'user' => $comment->user ? [
                     'id' => $comment->user->id,
                     'name' => $comment->user->name,
                     'avatar' => $comment->user->avatar ?? '/themes/thempho/images/default.jpg'
-                ]
+                ] : null
             ]
         ]);
     }
