@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Ophim\Crawler\OphimCrawler\Crawler;
+use Ophim\Crawler\OphimCrawler\Option;
 use Ophim\Core\Models\Movie;
 
 /**
@@ -26,7 +27,7 @@ class CrawlController extends CrudController
 
             foreach ($request['link'] as $link) {
                 if (preg_match('/(.*?)(\/phim\/)(.*?)/', $link)) {
-                    $link = sprintf('%s/phim/%s', config('ophim_crawler.domain', 'https://ophim1.com'), explode('phim/', $link)[1]);
+                    $link = sprintf('%s/phim/%s', Option::get('domain', 'https://ophim1.com'), explode('phim/', $link)[1]);
                     $response = json_decode(file_get_contents($link), true);
                     $data->push(collect($response['movie'])->only('name', 'slug')->toArray());
                 } else {
@@ -35,7 +36,7 @@ class CrawlController extends CrudController
                             'page' => $i
                         ]), true);
                         if ($response['status']) {
-                            $data->push(...$response['items']);
+                            $data->push(...$response['movies']);
                         }
                     }
                 }
@@ -53,12 +54,12 @@ class CrawlController extends CrudController
         $regions = [];
         try {
             $categories = Cache::remember('ophim_categories', 86400, function () {
-                $data = json_decode(file_get_contents(sprintf('%s/the-loai', config('ophim_crawler.domain', 'https://ophim1.com'))), true) ?? [];
+                $data = json_decode(file_get_contents(sprintf('%s/the-loai', Option::get('domain', 'https://ophim1.com'))), true) ?? [];
                 return collect($data)->pluck('name', 'name')->toArray();
             });
 
             $regions = Cache::remember('ophim_regions', 86400, function () {
-                $data = json_decode(file_get_contents(sprintf('%s/quoc-gia', config('ophim_crawler.domain', 'https://ophim1.com'))), true) ?? [];
+                $data = json_decode(file_get_contents(sprintf('%s/quoc-gia', Option::get('domain', 'https://ophim1.com'))), true) ?? [];
                 return collect($data)->pluck('name', 'name')->toArray();
             });
         } catch (\Throwable $th) {
@@ -72,7 +73,7 @@ class CrawlController extends CrudController
 
     public function crawl(Request $request)
     {
-        $pattern = sprintf('%s/phim/{slug}', config('ophim_crawler.domain', 'https://ophim1.com'));
+        $pattern = sprintf('%s/phim/{slug}', config('ophim_crawler.domain', 'https://xxvnapi.com/api'));
         try {
             $link = str_replace('{slug}', $request['slug'], $pattern);
             $crawler = (new Crawler($link, request('fields', []), request('excludedCategories', []), request('excludedRegions', []), request('excludedType', []), request('forceUpdate', false)))->handle();

@@ -1,55 +1,13 @@
 <?php
 
-namespace Ophim\Crawler\OphimCrawler;
+namespace App\Library;
 
+use Ophim\Crawler\OphimCrawler\Option as BaseOption;
 use Backpack\Settings\app\Models\Setting;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 
-class Option
+class CustomOption extends BaseOption
 {
-    public static function get($name, $default = null)
-    {
-        $entry = static::getEntry();
-        $fields = array_column(static::getAllOptions(), 'value', 'name');
-
-        $options = array_merge($fields, json_decode($entry->value, true) ?? []);
-
-        return isset($options[$name]) ? $options[$name] : $default;
-    }
-
-    // public static function set($name, $value)
-    // {
-    //     $entry = static::getEntry();
-    //     $fields = array_column(static::getAllOptions(), 'value', 'name');
-
-    //     $options = array_merge($fields, json_decode($entry->value, true) ?? []);
-
-    //     $options[$name] = $value;
-
-    //     return Setting::updateOrCreate([
-    //         'key' => 'hacoidev/ophim-crawler.options',
-    //     ], [
-    //         'name' => 'Options',
-    //         'field' => json_encode(['name' => 'value', 'type', 'hidden']),
-    //         'value' => json_encode($options),
-    //         'group' => 'crawler',
-    //         'active' => false
-    //     ]);
-    // }
-
-    public static function getEntry()
-    {
-        return Setting::firstOrCreate([
-            'key' => 'hacoidev/ophim-crawler.options',
-        ], [
-            'name' => 'Options',
-            'field' => json_encode(['name' => 'value', 'type' => 'hidden']),
-            'group' => 'crawler',
-            'active' => false
-        ]);
-    }
-
     public static function getAllOptions()
     {
         $categories = [];
@@ -67,7 +25,6 @@ class Option
         } catch (\Throwable $th) {
 
         }
-
 
         $fields = [
             'episodes' => 'Tập mới',
@@ -97,7 +54,7 @@ class Option
             'studios' => 'Studio',
         ];
 
-        return [
+        $options = [
             'domain' => [
                 'name' => 'domain',
                 'label' => 'API Domain',
@@ -309,6 +266,15 @@ class Option
                 'allows_multiple' => true,
                 'tab' => 'Schedule'
             ],
+            'crawl_domain' => [
+                'name' => 'crawl_domain',
+                'label' => 'Crawl Domain',
+                'type' => 'text',
+                'value' => 'https://example.com',
+                'tab' => 'Setting'
+            ],
         ];
+
+        return $options;
     }
 }

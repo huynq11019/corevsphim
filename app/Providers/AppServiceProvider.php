@@ -14,6 +14,15 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         //
+        $this->app->bind(
+            \Ophim\Crawler\OphimCrawler\Controllers\CrawlController::class,
+            \App\Http\Controllers\CustomCrawlController::class
+        );
+
+        $this->app->bind(
+            \Ophim\Crawler\OphimCrawler\Option::class,
+            \App\Library\CustomOption::class
+        );
     }
 
     /**
