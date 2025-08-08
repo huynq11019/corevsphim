@@ -11,12 +11,26 @@ use Ophim\Core\Models\Episode;
 use Ophim\Core\Models\Region;
 use Ophim\Core\Models\Tag;
 use Ophim\Crawler\OphimCrawler\Contracts\BaseCrawler;
+use Illuminate\Support\Facades\Log;
 
 class Crawler extends BaseCrawler
 {
     public function handle()
     {
+        Log::info('Crawler started', ['link' => $this->link]);
+
         $payload = json_decode($body = file_get_contents($this->link), true);
+
+        Log::info('API Response received', [
+            'response_keys' => array_keys($payload ?? []),
+            'has_movie_key' => isset($payload['movie']),
+            'payload_structure' => $payload ? array_keys($payload) : 'null'
+        ]);
+
+        if (!isset($payload['movie'])) {
+            Log::error('Missing movie key in payload', ['payload' => $payload]);
+            throw new \Exception('API response does not contain "movie" key');
+        }
 
         $this->checkIsInExcludedList($payload);
 
@@ -24,16 +38,28 @@ class Crawler extends BaseCrawler
             ->where('update_identity', $payload['movie']['_id'])
             ->first();
 
+        Log::info('Movie lookup', [
+            'movie_id' => $payload['movie']['_id'] ?? 'missing',
+            'found_existing' => !is_null($movie)
+        ]);
+
         if (!$this->hasChange($movie, md5($body)) && $this->forceUpdate == false) {
+            Log::info('No changes detected, skipping update');
             return false;
         }
 
+        Log::info('Processing movie data', ['force_update' => $this->forceUpdate]);
+
         $info = (new Collector($payload, $this->fields, $this->forceUpdate))->get();
 
+        Log::info('Collector data extracted', ['fields' => array_keys($info)]);
+
         if ($movie) {
+            Log::info('Updating existing movie', ['movie_id' => $movie->id]);
             $movie->updated_at = now();
             $movie->update(collect($info)->only($this->fields)->merge(['update_checksum' => md5($body)])->toArray());
         } else {
+            Log::info('Creating new movie');
             $movie = Movie::create(array_merge($info, [
                 'update_handler' => static::class,
                 'update_identity' => $payload['movie']['_id'],
@@ -48,6 +74,8 @@ class Crawler extends BaseCrawler
         $this->syncTags($movie, $payload);
         $this->syncStudios($movie, $payload);
         $this->updateEpisodes($movie, $payload);
+
+        Log::info('Movie processing completed', ['movie_id' => $movie->id]);
     }
 
     protected function hasChange(?Movie $movie, $checksum)
@@ -57,20 +85,30 @@ class Crawler extends BaseCrawler
 
     protected function checkIsInExcludedList($payload)
     {
+        Log::info('Checking excluded list', [
+            'has_movie' => isset($payload['movie']),
+            'movie_keys' => isset($payload['movie']) ? array_keys($payload['movie']) : 'missing'
+        ]);
+
         $newType = $payload['movie']['type'];
         if (in_array($newType, $this->excludedType)) {
+            Log::warning('Movie excluded by type', ['type' => $newType]);
             throw new \Exception("Thuộc định dạng đã loại trừ");
         }
 
         $newCategories = collect($payload['movie']['category'])->pluck('name')->toArray();
         if (array_intersect($newCategories, $this->excludedCategories)) {
+            Log::warning('Movie excluded by categories', ['categories' => $newCategories]);
             throw new \Exception("Thuộc thể loại đã loại trừ");
         }
 
         $newRegions = collect($payload['movie']['country'])->pluck('name')->toArray();
         if (array_intersect($newRegions, $this->excludedRegions)) {
+            Log::warning('Movie excluded by regions', ['regions' => $newRegions]);
             throw new \Exception("Thuộc quốc gia đã loại trừ");
         }
+
+        Log::info('Movie passed exclusion checks');
     }
 
     protected function syncActors($movie, array $payload)

@@ -18,7 +18,7 @@ use Ophim\Core\Models\Movie;
  */
 class CrawlController extends CrudController
 {
-    public function fetch(Request $request)
+   public function fetch(Request $request)
     {
         try {
             $data = collect();
@@ -27,7 +27,7 @@ class CrawlController extends CrudController
 
             foreach ($request['link'] as $link) {
                 if (preg_match('/(.*?)(\/phim\/)(.*?)/', $link)) {
-                    $link = sprintf('%s/phim/%s', Option::get('domain', 'https://ophim1.com'), explode('phim/', $link)[1]);
+                    $link = sprintf('%s/phim/%s', config('ophim_crawler.domain', 'https://ophim1.com'), explode('phim/', $link)[1]);
                     $response = json_decode(file_get_contents($link), true);
                     $data->push(collect($response['movie'])->only('name', 'slug')->toArray());
                 } else {
@@ -36,7 +36,7 @@ class CrawlController extends CrudController
                             'page' => $i
                         ]), true);
                         if ($response['status']) {
-                            $data->push(...$response['movies']);
+                            $data->push(...$response['items']);
                         }
                     }
                 }
@@ -71,9 +71,9 @@ class CrawlController extends CrudController
         return view('ophim-crawler::crawl', compact('fields', 'regions', 'categories'));
     }
 
-    public function crawl(Request $request)
+     public function crawl(Request $request)
     {
-        $pattern = sprintf('%s/phim/{slug}', config('ophim_crawler.domain', 'https://xxvnapi.com/api'));
+        $pattern = sprintf('%s/phim/{slug}', config('ophim_crawler.domain', 'https://ophim1.com'));
         try {
             $link = str_replace('{slug}', $request['slug'], $pattern);
             $crawler = (new Crawler($link, request('fields', []), request('excludedCategories', []), request('excludedRegions', []), request('excludedType', []), request('forceUpdate', false)))->handle();

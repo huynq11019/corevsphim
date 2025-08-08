@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use Ophim\Crawler\OphimCrawler\Controllers\CrawlController as BaseCrawlController;
 use Illuminate\Http\Request;
+use App\Library\CustomOption as Option;
+use Illuminate\Support\Facades\Http;
+use App\Crawlers\CustomCrawler;
+use Illuminate\Support\Facades\Log;
 
 class CustomCrawlController extends BaseCrawlController
 {
@@ -31,7 +35,7 @@ class CustomCrawlController extends BaseCrawlController
                             'page' => $i
                         ]), true);
                         if ($response['status']) {
-                            $data->push(...$response['movies']);
+                            $data->push(...$response['items']);
                         }
                     }
                 }
@@ -45,11 +49,31 @@ class CustomCrawlController extends BaseCrawlController
 
     public function crawl(Request $request)
     {
-        $pattern = sprintf('%s/phim/{slug}', config('ophim_crawler.domain', 'https://xxvnapi.com/api'));
+        // $pattern = sprintf('%s/phim/{slug}', config('ophim_crawler.domain', 'https://xxvnapi.com/api'));
+        $pattern = 'https://platform.phoai.vn/webhook/xxvnapi/detail?slug={slug}';
         try {
             $link = str_replace('{slug}', $request['slug'], $pattern);
-            $crawler = (new Crawler($link, request('fields', []), request('excludedCategories', []), request('excludedRegions', []), request('excludedType', []), request('forceUpdate', false)))->handle();
+
+            Log::info('CustomCrawlController: Starting crawl', [
+                'slug' => $request['slug'],
+                'link' => $link,
+                'fields' => request('fields', []),
+                'excludedCategories' => request('excludedCategories', []),
+                'excludedRegions' => request('excludedRegions', []),
+                'excludedType' => request('excludedType', []),
+                'forceUpdate' => request('forceUpdate', false)
+            ]);
+
+            $crawler = (new CustomCrawler($link, request('fields', []), request('excludedCategories', []), request('excludedRegions', []), request('excludedType', []), request('forceUpdate', false)))->handle();
+
+            Log::info('CustomCrawlController: Crawl completed successfully');
+
         } catch (\Exception $e) {
+            Log::error('CustomCrawlController: Crawl failed', [
+                'error' => $e->getMessage(),
+                'slug' => $request['slug'],
+                'link' => $link ?? 'unknown'
+            ]);
             return response()->json(['message' => $e->getMessage(), 'wait' => false], 500);
         }
         return response()->json(['message' => 'OK', 'wait' => $crawler ?? true]);
