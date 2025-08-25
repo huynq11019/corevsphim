@@ -49,8 +49,9 @@ class CustomCrawlController extends BaseCrawlController
 
     public function crawl(Request $request)
     {
+
         // $pattern = sprintf('%s/phim/{slug}', config('ophim_crawler.domain', 'https://xxvnapi.com/api'));
-        $pattern = 'https://platform.phoai.vn/webhook/xxvnapi/detail?slug={slug}';
+        $pattern = 'http://localhost:5678/webhook/xxvnapi/detail?slug={slug}';
         try {
             $link = str_replace('{slug}', $request['slug'], $pattern);
 

@@ -35,7 +35,7 @@
                                 </select>
                                 <button class="btn btn-sm btn-primary" id="movies-get-handle">Lấy danh sách</button>
                             </div>
-                            <textarea class="form-control" rows="5" name="link">https://platform.phoai.vn/webhook/xxvnapi/list</textarea>
+                            <textarea class="form-control" rows="5" name="link">http://localhost:5678/webhook/xxvnapi/list</textarea>
                             <small><i>Mỗi link cách nhau 1 dòng</i></small>
                         </div>
                         <div class="form-group col-12">

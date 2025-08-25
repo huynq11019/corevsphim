@@ -1,4 +1,4 @@
-@extends('themes::thememotchill.layout')
+docccc@extends('themes::thememotchill.layout')
 
 @push('header')
 @endpush
